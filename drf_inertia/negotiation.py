@@ -69,10 +69,13 @@ class Inertia(object):
                 raise Conflict()
 
             # set partial details if they exist and are valid
-            partial_component = request.META.get('HTTP_X_INERTIA_PARTIAL_COMPONENT', None)
-            partial_data = request.META.get('HTTP_X_INERTIA_PARTIAL_DATA', None)
+            partial_component = request.META.get(
+                'HTTP_X_INERTIA_PARTIAL_COMPONENT', None)
+            partial_data = request.META.get(
+                'HTTP_X_INERTIA_PARTIAL_DATA', None)
             if partial_data and partial_component == component:
-                inertia.partial_data = [s.strip() for s in partial_data.split(',')]
+                inertia.partial_data = [s.strip()
+                                        for s in partial_data.split(',')]
 
         return inertia
 
@@ -84,7 +87,8 @@ class InertiaRendererMixin(object):
             # add the data to the inertia object then serialize it
             # with the InertiaSerializer
             renderer_context["request"].inertia.data = data
-            serializer = InertiaSerializer(renderer_context["request"].inertia, context=renderer_context)
+            serializer = InertiaSerializer(
+                renderer_context["request"].inertia, context=renderer_context)
             data = serializer.data
 
             # add response headers
@@ -100,7 +104,8 @@ class InertiaRendererMixin(object):
 
 class InertiaHTMLRenderer(InertiaRendererMixin, TemplateHTMLRenderer):
     def get_template_context(self, data, renderer_context):
-        context = super(InertiaHTMLRenderer, self).get_template_context(data, renderer_context)
+        context = super(InertiaHTMLRenderer, self).get_template_context(
+            data, renderer_context)
 
         # add the inertia data as json into the template
         context[TEMPLATE_VAR] = json.dumps(data)

@@ -1,8 +1,8 @@
 from functools import wraps
 
-from .negotiation import Inertia, InertiaNegotiation
+from .config import DEBUG, TEMPLATE
 from .exceptions import exception_handler
-from .config import TEMPLATE, DEBUG
+from .negotiation import Inertia, InertiaNegotiation
 
 
 def inertia(component_path, template_name=None, **component_kwargs):

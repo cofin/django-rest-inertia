@@ -7,10 +7,10 @@ pytest-django>=3.9
 pytest>=5.0,<5.1
 pytest-cov==2.7.1
 pytest-mock==3.0.0
-flake8==2.2.2
+flake8>=.2.2
 
 # wheel for PyPI installs
-wheel==0.34.2
+wheel>=0.34.2
 
 # MkDocs for documentation previews/deploys
-mkdocs==0.11.1
+mkdocs>=0.11.1
