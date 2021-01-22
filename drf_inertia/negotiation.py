@@ -16,7 +16,7 @@ REDIRECTS = [
 
 
 def is_valid_inertia_response(status_code):
-    return status_code == status.HTTP_409_CONFLICT or status_code < 300
+    return status_code == status.HTTP_409_CONFLICT or status_code < 300 or status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
 
 class Inertia(object):
