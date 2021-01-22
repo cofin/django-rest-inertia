@@ -63,6 +63,10 @@ class DefaultExceptionHandler(object):
                 # add the errors to the users session
                 request.session["errors"] = response.data
 
+        if is_inertia and response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED:
+            # add the errors to the users session
+            request.session["errors"] = response.data
+
         if is_inertia and response.status_code == status.HTTP_409_CONFLICT:
             response['X-Inertia-Location'] = request.path
 
