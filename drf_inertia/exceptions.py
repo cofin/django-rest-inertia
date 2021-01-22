@@ -39,7 +39,8 @@ class DefaultExceptionHandler(object):
 
         if is_inertia and isinstance(exc, ValidationError):
             # redirect user to the error redirect for this page (default is current page)
-            override_headers["Location"] = request.inertia.get_error_redirect(request)
+            override_headers["Location"] = request.inertia.get_error_redirect(
+                request)
             override_status = self.get_redirect_status(request)
 
         if is_inertia and (isinstance(exc, PermissionDenied) or isinstance(exc, NotAuthenticated)):
