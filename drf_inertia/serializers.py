@@ -143,7 +143,7 @@ class AuthSerializer(serializers.Serializer):
 class InertiaSharedSerializer(DefaultSharedSerializer):
     user = serializers.SerializerMethodField()
 
-    def get_users(self, obj):
+    def get_user(self, obj):
         serializer_class = import_string(USER_SERIALIZER)
         serializer = serializer_class(
             self.context["request"], context=self.context)
