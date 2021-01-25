@@ -143,7 +143,7 @@ class AuthSerializer(serializers.Serializer):
 
 
 class InertiaSharedSerializer(DefaultSharedSerializer):
-    user = AuthSerializer()
+    user = AuthSerializer(source="*")
 
     class Meta:
         fields = ("flash", "errors", "user", "pageMeta")
