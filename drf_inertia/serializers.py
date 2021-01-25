@@ -137,13 +137,7 @@ class DefaultUserSerializer(serializers.ModelSerializer):
 
 
 class AuthSerializer(serializers.Serializer):
-    user = serializers.SerializerMethodField()
-
-    def get_user(self, obj):
-        serializer_class = import_string(USER_SERIALIZER)
-        serializer = serializer_class(
-            self.context["request"], context=self.context)
-        return serializer.data
+    user = import_string(USER_SERIALIZER)
 
 
 class InertiaSharedSerializer(DefaultSharedSerializer):
