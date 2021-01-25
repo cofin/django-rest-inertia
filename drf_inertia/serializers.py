@@ -75,7 +75,7 @@ class SharedField(fields.Field):
 
 
 # let's put some basic meta information in all props
-class MetaSerializer(SharedField):
+class PageMetaSerializer(SharedField):
     def to_representation(self, value):
         # no need to iterate (and mark used) messages if 409 response
         app_meta = {}
@@ -119,7 +119,7 @@ class DefaultSharedSerializer(SharedSerializerBase):
     errors = SessionSerializerField(
         "errors", default=OrderedDict(), source='*')
     flash = FlashSerializer(default=OrderedDict(), source='*')
-    app_meta = MetaSerializer(default=OrderedDict(), source="*")
+    pageMeta = PageMetaSerializer(default=OrderedDict(), source="*")
 
 
 class DefaultUserSerializer(serializers.ModelSerializer):
@@ -141,10 +141,16 @@ class AuthSerializer(serializers.Serializer):
 
 
 class InertiaSharedSerializer(DefaultSharedSerializer):
-    auth = AuthSerializer(source="*")
+    user = serializers.SerializerMethodField()
+
+    def get_props(self, obj):
+        serializer_class = import_string(USER_SERIALIZER)
+        serializer = serializer_class(
+            self.context["request"], context=self.context)
+        return serializer.data
 
     class Meta:
-        fields = ("flash", "errors", "auth", "app_meta")
+        fields = ("flash", "errors", "user", "pageMeta")
 
 
 class InertiaSerializer(serializers.Serializer):
