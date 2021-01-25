@@ -13,6 +13,10 @@ TEMPLATE_VAR = getattr(settings, 'INERTIA_TEMPLATE_VAR', 'inertia_json')
 SHARED_DATA_SERIALIZER = getattr(
     settings, 'INERTIA_SHARED_SERIALIZER', 'drf_inertia.serializers.DefaultSharedSerializer')
 
+USER_SERIALIZER = getattr(
+    settings, 'INERTIA_USER_SERIALIZER', 'drf_inertia.serializers.DefaultUserSerializer')
+
+
 # The exception handler for inertia requests
 # ensures that exceptions are returned in interia
 # format

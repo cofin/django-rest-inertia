@@ -1,9 +1,14 @@
 from collections import OrderedDict
-from django.contrib import messages
-from django.utils.module_loading import import_string
-from rest_framework import serializers, fields, status
 
-from .config import SHARED_DATA_SERIALIZER
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.middleware.csrf import get_token
+from django.utils.module_loading import import_string
+from rest_framework import fields, serializers, status
+
+from .config import SHARED_DATA_SERIALIZER, USER_SERIALIZER
+
+User = get_user_model()
 
 
 class SharedSerializerBase(serializers.Serializer):
@@ -29,6 +34,7 @@ class SharedSerializerBase(serializers.Serializer):
     from methods as soon as possible.
 
     """
+
     def __init__(self, instance=None, *args, **kwargs):
         # exclude fields already in data or not in instance.partial_data
         exclude = instance.inertia.data.keys()
@@ -68,6 +74,21 @@ class SharedField(fields.Field):
         return instance
 
 
+# let's put some basic meta information in all props
+class MetaSerializer(SharedField):
+    def to_representation(self, value):
+        # no need to iterate (and mark used) messages if 409 response
+        app_meta = {}
+        request = self.context["request"]
+        app_meta = {
+            "appName": request.resolver_match.app_name,
+            "namespace": request.resolver_match.namespace,
+            "urlName": request.resolver_match.url_name,
+            "csrfToken": get_token(request),
+        }
+        return app_meta
+
+
 class FlashSerializer(SharedField):
     def to_representation(self, value):
         # no need to iterate (and mark used) messages if 409 response
@@ -95,8 +116,41 @@ class SessionSerializerField(SharedField):
 
 
 class DefaultSharedSerializer(SharedSerializerBase):
-    errors = SessionSerializerField("errors", default=OrderedDict(), source='*')
+    errors = SessionSerializerField(
+        "errors", default=OrderedDict(), source='*')
     flash = FlashSerializer(default=OrderedDict(), source='*')
+    app_meta = MetaSerializer(default=OrderedDict(), source="*")
+
+
+class DefaultUserSerializer(serializers.ModelSerializer):
+    # set required to false - throwing an error if AnonymousUser
+    email = serializers.EmailField(required=False)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+            "is_superuser",
+            "is_staff",
+        )
+
+
+class AuthSerializer(serializers.Serializer):
+    user = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        serializer_class = import_string(USER_SERIALIZER)
+        serializer = serializer_class(
+            self.context["request"], context=self.context)
+        return serializer.data
+
+
+class InertiaSharedSerializer(DefaultSharedSerializer):
+    auth = AuthSerializer(source="*")
+
+    class Meta:
+        fields = ("flash", "errors", "auth", "app_meta")
 
 
 class InertiaSerializer(serializers.Serializer):
@@ -107,5 +161,6 @@ class InertiaSerializer(serializers.Serializer):
 
     def get_props(self, obj):
         serializer_class = import_string(SHARED_DATA_SERIALIZER)
-        serializer = serializer_class(self.context["request"], context=self.context)
+        serializer = serializer_class(
+            self.context["request"], context=self.context)
         return serializer.data
