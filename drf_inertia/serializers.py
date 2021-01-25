@@ -125,12 +125,14 @@ class DefaultSharedSerializer(SharedSerializerBase):
 class DefaultUserSerializer(serializers.ModelSerializer):
     # set required to false - throwing an error if AnonymousUser
     email = serializers.EmailField(required=False)
+    name = serializers.CharField(required=False, trim_whitespace=False)
 
     class Meta:
         model = User
         fields = (
             "id",
             "email",
+            "name",
             "is_superuser",
             "is_staff",
         )
@@ -141,13 +143,7 @@ class AuthSerializer(serializers.Serializer):
 
 
 class InertiaSharedSerializer(DefaultSharedSerializer):
-    user = serializers.SerializerMethodField()
-
-    def get_user(self, obj):
-        serializer_class = import_string(USER_SERIALIZER)
-        serializer = serializer_class(
-            self.context["request"], context=self.context)
-        return serializer.data
+    user = AuthSerializer()
 
     class Meta:
         fields = ("flash", "errors", "user", "pageMeta")
