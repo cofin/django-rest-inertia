@@ -140,7 +140,7 @@ class DefaultUserSerializer(serializers.ModelSerializer):
 
 
 class AuthSerializer(serializers.Serializer):
-    user = import_string(USER_SERIALIZER)(source="*")
+    user = import_string(USER_SERIALIZER)
 
 
 class InertiaSharedSerializer(DefaultSharedSerializer):
