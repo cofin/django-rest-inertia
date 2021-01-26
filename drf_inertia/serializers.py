@@ -78,15 +78,16 @@ class SharedField(fields.Field):
 class PageMetaSerializer(SharedField):
     def to_representation(self, value):
         # no need to iterate (and mark used) messages if 409 response
-        app_meta = {}
+        meta = {}
         request = self.context["request"]
-        app_meta = {
+        meta = {
             "appName": request.resolver_match.app_name,
             "namespace": request.resolver_match.namespace,
             "urlName": request.resolver_match.url_name,
             "csrfToken": get_token(request),
+
         }
-        return app_meta
+        return meta
 
 
 class FlashSerializer(SharedField):
@@ -119,7 +120,7 @@ class DefaultSharedSerializer(SharedSerializerBase):
     errors = SessionSerializerField(
         "errors", default=OrderedDict(), source='*')
     flash = FlashSerializer(default=OrderedDict(), source='*')
-    pageMeta = PageMetaSerializer(default=OrderedDict(), source="*")
+    meta = PageMetaSerializer(default=OrderedDict(), source="*")
 
 
 class DefaultUserSerializer(serializers.ModelSerializer):
@@ -139,14 +140,14 @@ class DefaultUserSerializer(serializers.ModelSerializer):
 
 
 class AuthSerializer(serializers.Serializer):
-    user = import_string(USER_SERIALIZER)
+    user = import_string(USER_SERIALIZER)(source="*")
 
 
 class InertiaSharedSerializer(DefaultSharedSerializer):
     user = AuthSerializer(source="*")
 
     class Meta:
-        fields = ("flash", "errors", "user", "pageMeta")
+        fields = ("flash", "errors", "user", "meta")
 
 
 class InertiaSerializer(serializers.Serializer):
